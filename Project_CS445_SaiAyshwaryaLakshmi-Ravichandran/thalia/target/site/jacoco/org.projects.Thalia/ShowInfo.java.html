@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ShowInfo.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.Thalia</a> &gt; <span class="el_source">ShowInfo.java</span></div><h1>ShowInfo.java</h1><pre class="source lang-java linenums">package org.projects.Thalia;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class ShowInfo {
+
+@SerializedName(&quot;name&quot;)
+@Expose
+private String name;
+@SerializedName(&quot;web&quot;)
+@Expose
+private String web;
+@SerializedName(&quot;date&quot;)
+@Expose
+private String date;
+@SerializedName(&quot;time&quot;)
+@Expose
+private String time;
+
+/**
+* No args constructor for use in serialization
+*  
+*/
+
+public ShowInfo(ShowInfo showinfo)
+<span class="fc" id="L27">{</span>
+<span class="fc" id="L28">	this.name=showinfo.name;</span>
+<span class="fc" id="L29">	this.web=showinfo.web;</span>
+<span class="fc" id="L30">	this.date=showinfo.date;</span>
+<span class="fc" id="L31">	this.time=showinfo.time;</span>
+<span class="fc" id="L32">}</span>
+<span class="fc" id="L33">public ShowInfo() {</span>
+<span class="fc" id="L34">}</span>
+
+/**
+* 
+* @param time
+* @param name
+* @param web
+* @param date
+*/
+public ShowInfo(String name, String web, String date, String time) {
+<span class="fc" id="L44">super();</span>
+<span class="fc" id="L45">this.name = name;</span>
+<span class="fc" id="L46">this.web = web;</span>
+<span class="fc" id="L47">this.date = date;</span>
+<span class="fc" id="L48">this.time = time;</span>
+<span class="fc" id="L49">}</span>
+
+public String getName() {
+<span class="fc" id="L52">return name;</span>
+}
+
+public void setName(String name) {
+<span class="fc" id="L56">this.name = name;</span>
+<span class="fc" id="L57">}</span>
+
+public String getWeb() {
+<span class="fc" id="L60">return web;</span>
+}
+
+public void setWeb(String web) {
+<span class="fc" id="L64">this.web = web;</span>
+<span class="fc" id="L65">}</span>
+
+public String getDate() {
+<span class="fc" id="L68">return date;</span>
+}
+
+public void setDate(String date) {
+<span class="fc" id="L72">this.date = date;</span>
+<span class="fc" id="L73">}</span>
+
+public String getTime() {
+<span class="fc" id="L76">return time;</span>
+}
+
+public void setTime(String time) {
+<span class="fc" id="L80">this.time = time;</span>
+<span class="fc" id="L81">}</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

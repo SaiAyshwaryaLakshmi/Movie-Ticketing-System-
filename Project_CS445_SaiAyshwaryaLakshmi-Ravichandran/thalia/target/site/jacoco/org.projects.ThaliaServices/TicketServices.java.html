@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TicketServices.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.ThaliaServices</a> &gt; <span class="el_source">TicketServices.java</span></div><h1>TicketServices.java</h1><pre class="source lang-java linenums">package org.projects.ThaliaServices;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.projects.Thalia.Donations;
+import org.projects.Thalia.OrdersSectionReceipt;
+import org.projects.Thalia.Tickets;
+import org.projects.ThaliaUtility.UtilityDataStore;
+import org.projects.ThaliaUtility.UniqueIdGenerator;
+
+import com.google.gson.Gson;
+
+@Path(&quot;/tickets&quot;)
+<span class="fc" id="L23">public class TicketServices {</span>
+
+	@POST
+	@Path(&quot;/donations&quot;)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response offerDonations(String json) {
+
+<span class="fc" id="L31">		Gson gson = new Gson();</span>
+<span class="fc" id="L32">		Donations donations = gson.fromJson(json, Donations.class);</span>
+
+<span class="fc bfc" id="L34" title="All 2 branches covered.">		for (String s : donations.getTickets()) {</span>
+<span class="fc" id="L35">			UtilityDataStore.subscriptionList.add(s);</span>
+<span class="fc" id="L36">		}</span>
+<span class="fc" id="L37">		String s = gson.toJson(UtilityDataStore.responseMap);</span>
+<span class="fc" id="L38">		setTickets(donations.getTickets());</span>
+<span class="fc" id="L39">		return Response.status(Response.Status.CREATED).entity(s).build();</span>
+	}
+
+	public void setTickets(List&lt;String&gt; donatedTickets) {
+<span class="fc" id="L43">		boolean isTicketFound = false;</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">		for (String s : donatedTickets) {</span>
+<span class="fc" id="L45">			isTicketFound = false;</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">			for (OrdersSectionReceipt receipt : UtilityDataStore.ordersSectionReceiptMap.values()) {</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">				for (Tickets ticket : receipt.getTickets()) {</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">					if (ticket.getTid().equalsIgnoreCase(s)) {</span>
+<span class="nc" id="L49">						ticket.setStatus(&quot;donated&quot;);</span>
+<span class="nc" id="L50">						break;</span>
+					}
+<span class="fc" id="L52">				}</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">				if (isTicketFound)</span>
+<span class="nc" id="L54">					break;</span>
+<span class="fc" id="L55">			}</span>
+<span class="fc" id="L56">		}</span>
+<span class="fc" id="L57">	} </span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

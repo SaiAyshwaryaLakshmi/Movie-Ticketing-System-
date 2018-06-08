@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SeatingServices.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.ThaliaServices</a> &gt; <span class="el_source">SeatingServices.java</span></div><h1>SeatingServices.java</h1><pre class="source lang-java linenums">package org.projects.ThaliaServices;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.FileUtils;
+import org.projects.Thalia.Seat;
+import org.projects.Thalia.Seating;
+import org.projects.Thalia.SeatingShows;
+import org.projects.Thalia.SectionInfo;
+import org.projects.Thalia.Shows;
+import org.projects.ThaliaUtility.ExclusionStrategyForTickets;
+import org.projects.ThaliaUtility.UtilityDataStore;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+ 
+@Path(&quot;/seating&quot;)
+<span class="fc" id="L31">public class SeatingServices {</span>
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSections(@QueryParam(&quot;show&quot;) String wid, @QueryParam(&quot;section&quot;) String sid,
+			@QueryParam(&quot;count&quot;) String count, @QueryParam(&quot;starting_seat_id&quot;) String startingSeatId) {
+
+<span class="pc bpc" id="L38" title="1 of 4 branches missed.">		if (null == wid || wid.equalsIgnoreCase(&quot;&quot;)) {</span>
+<span class="fc" id="L39">			return getAllSections();</span>
+		} else
+
+<span class="fc" id="L42">			return getSeatsForSection(wid, sid, count, startingSeatId,-1);</span>
+	}
+
+	private Response getSeatsForSection(String wid, String sid, String count, String startingSeatId, int skipRowCount) {
+<span class="fc" id="L46">		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getSpecificSection&quot;))</span>
+<span class="fc" id="L47">				.setPrettyPrinting().create();</span>
+<span class="fc" id="L48">		String setStartId=null;</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">		if(skipRowCount!=-1)</span>
+		{
+<span class="nc" id="L51">			setStartId=startingSeatId;</span>
+<span class="nc" id="L52">			startingSeatId=null;</span>
+		}
+<span class="fc" id="L54">		int skipRows=skipRowCount;</span>
+		String s;
+<span class="fc" id="L56">		Boolean seatAvailableFlag = false;</span>
+<span class="fc" id="L57">		Boolean seatFound = false;</span>
+<span class="fc" id="L58">		boolean stopSkipflag=false;</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">		if (UtilityDataStore.showsMap.containsKey(wid)) {</span>
+<span class="fc" id="L60">			Shows shows = new Shows(UtilityDataStore.showsMap.get(wid));</span>
+
+<span class="fc" id="L62">			List&lt;SectionInfo&gt; sectionInfoList = shows.getSectionInfo();</span>
+<span class="fc" id="L63">			List&lt;SectionInfo&gt; sectionInfoSpecificList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L64">			List&lt;Seating&gt; seatingSpecificList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L65">			List&lt;Seat&gt; seatSpecificList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L66">			int counter = 1;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">			for (SectionInfo sectionInfo : sectionInfoList) {</span>
+<span class="fc" id="L68">				stopSkipflag=false;</span>
+<span class="fc" id="L69">				skipRows=skipRowCount;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">				if(skipRowCount ==-1)</span>
+				{
+<span class="fc" id="L72">					skipRowCount =0; </span>
+				}
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">				if (sectionInfo.getSid().equalsIgnoreCase(sid)) {</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">					for (Seating seating : sectionInfo.getSeating()) {</span>
+						
+						
+<span class="pc bpc" id="L78" title="1 of 4 branches missed.">						if (null == startingSeatId || startingSeatId.equalsIgnoreCase(&quot;&quot;)) {</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">							if(skipRows&gt;0)</span>
+							{
+<span class="nc" id="L81">								skipRows--;</span>
+<span class="nc" id="L82">								continue;</span>
+							}
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">							if (seating.getSeats().size() &gt;= new Integer(count)) {</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">								for (Seat seat : seating.getSeats()) {</span>
+<span class="fc" id="L86">									seatSpecificList.add(seat);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">									if (counter == new Integer(count)) {</span>
+<span class="fc" id="L88">									    break;</span>
+									}
+<span class="nc" id="L90">									counter++;</span>
+<span class="nc" id="L91">								}</span>
+<span class="fc" id="L92">								seating.setSeats(seatSpecificList);</span>
+<span class="fc" id="L93">								seatingSpecificList.add(seating);</span>
+<span class="fc" id="L94">								sectionInfo.setSeating(seatingSpecificList);</span>
+<span class="fc" id="L95">								sectionInfoSpecificList.add(sectionInfo);</span>
+<span class="fc" id="L96">								shows.setStartingSeatId(seatSpecificList.get(0).getCid());</span>
+<span class="fc" id="L97">								shows.setSectionInfo(sectionInfoSpecificList);</span>
+<span class="fc" id="L98">								shows.setStatus(&quot;ok&quot;);</span>
+<span class="fc" id="L99">								shows.setTotalAmount(new Integer(count) * sectionInfo.getPrice());</span>
+<span class="fc" id="L100">								seatAvailableFlag = true;</span>
+<span class="fc" id="L101">								break;</span>
+							}
+						} else {
+							
+								
+							
+<span class="fc" id="L107">							counter = 0;</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">							if(stopSkipflag==false)</span>
+							{
+<span class="fc" id="L110">							skipRowCount++;</span>
+							}
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">							for (Seat seat : seating.getSeats()) {</span>
+<span class="pc bpc" id="L113" title="3 of 4 branches missed.">								if (!seat.getCid().equalsIgnoreCase(startingSeatId) &amp;&amp; seatFound == false) {</span>
+<span class="nc" id="L114">									counter++;</span>
+								} else {
+<span class="fc" id="L116">									int i = 1;</span>
+									
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">									if (seating.getSeats().size() - counter &gt;= new Integer(count)) {</span>
+<span class="fc" id="L119">										seatFound = true;</span>
+<span class="fc" id="L120">										seatSpecificList.add(seat);</span>
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">										if (i == new Integer(count)) {</span>
+<span class="fc" id="L122">											break;</span>
+										}
+<span class="nc" id="L124">										i++;</span>
+									} else {
+<span class="nc" id="L126">										stopSkipflag=true;</span>
+<span class="nc" id="L127">										break;</span>
+									}
+								}
+<span class="nc" id="L130">							}</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">							if (seatFound == true) {</span>
+<span class="fc" id="L132">								skipRowCount=-1;</span>
+<span class="fc" id="L133">								seating.setSeats(seatSpecificList);</span>
+<span class="fc" id="L134">								seatingSpecificList.add(seating);</span>
+<span class="fc" id="L135">								sectionInfo.setSeating(seatingSpecificList);</span>
+<span class="fc" id="L136">								sectionInfoSpecificList.add(sectionInfo);</span>
+<span class="fc" id="L137">								shows.setStartingSeatId(seatSpecificList.get(0).getCid());</span>
+<span class="fc" id="L138">								shows.setSectionInfo(sectionInfoSpecificList);</span>
+<span class="fc" id="L139">								shows.setStatus(&quot;ok&quot;);</span>
+<span class="fc" id="L140">								shows.setTotalAmount(new Integer(count) * sectionInfo.getPrice());</span>
+<span class="fc" id="L141">								seatAvailableFlag = true;</span>
+<span class="fc" id="L142">								break;</span>
+							}
+						}
+<span class="nc" id="L145">					}</span>
+
+<span class="pc bpc" id="L147" title="3 of 4 branches missed.">					if (seatAvailableFlag == false</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">							&amp;&amp; !(null == startingSeatId || startingSeatId.equalsIgnoreCase(&quot;&quot;))) {</span>
+<span class="nc" id="L149">						return getSeatsForSection(wid, sid, count, startingSeatId,skipRowCount);</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">					} else if (seatAvailableFlag == false) {</span>
+<span class="nc" id="L151">						skipRowCount=-1;</span>
+<span class="nc" id="L152">						shows.setSectionInfo(sectionInfoSpecificList);</span>
+<span class="nc" id="L153">						shows.setStartingSeatId(sectionInfo.getSeating().get(0).getSeats().get(0).getCid());</span>
+<span class="nc" id="L154">						shows.setStatus(&quot;Error: &quot; + count + &quot; contiguous seats not available&quot;);</span>
+<span class="nc" id="L155">						break;</span>
+					}
+				}
+<span class="fc" id="L158">			}</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">			if(setStartId!=null)</span>
+			{
+<span class="nc" id="L161">				shows.setStartingSeatId(setStartId);</span>
+			}
+<span class="fc" id="L163">			SeatingShows seatingShows = new SeatingShows(shows);</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">			if(seatAvailableFlag==false)</span>
+			{
+<span class="nc" id="L166">				seatingShows.setSid(sid);</span>
+<span class="nc" id="L167">				seatingShows.setSectionName(UtilityDataStore.theatreSectionMap.get(sid).getSectionName());</span>
+			}
+<span class="fc" id="L169">			s = gson.toJson(seatingShows);</span>
+		
+<span class="fc" id="L171">		} else {</span>
+<span class="nc" id="L172">			s = &quot;{\&quot;Result\&quot;:\&quot;Notfound\&quot;}&quot;;</span>
+		}
+<span class="fc" id="L174">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	private Response getAllSections() {
+<span class="fc" id="L178">		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategyForTickets(&quot;allSections&quot;))</span>
+<span class="fc" id="L179">				.setPrettyPrinting().create();</span>
+<span class="fc" id="L180">		String s = gson.toJson(new ArrayList(UtilityDataStore.theatreSectionMap.values()));</span>
+<span class="fc" id="L181">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+ 
+	@GET
+	@Path(&quot;{id}&quot;)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSpecificSection(@PathParam(&quot;id&quot;) String sid) {
+		// calls the &quot;Get All Lamps&quot; use case
+<span class="fc" id="L189">		Gson gson = new GsonBuilder().setPrettyPrinting().create();</span>
+		String s;
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">		if (UtilityDataStore.theatreSectionMap.containsKey(sid)) {</span>
+<span class="fc" id="L192">			s = gson.toJson(UtilityDataStore.theatreSectionMap.get(sid));</span>
+		} else {
+<span class="nc" id="L194">			s = &quot;{\&quot;Result\&quot;:\&quot;Notfound\&quot;}&quot;;</span>
+		}
+<span class="fc" id="L196">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	@PostConstruct
+	public void postConstruct() {
+<span class="fc" id="L201">		UtilityDataStore.initializeTheatreSection();</span>
+<span class="fc" id="L202">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

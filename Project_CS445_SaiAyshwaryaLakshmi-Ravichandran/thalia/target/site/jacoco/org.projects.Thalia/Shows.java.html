@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Shows.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.Thalia</a> &gt; <span class="el_source">Shows.java</span></div><h1>Shows.java</h1><pre class="source lang-java linenums">package org.projects.Thalia;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+
+public class Shows {
+
+@SerializedName(&quot;wid&quot;)
+@Expose
+private String wid;
+@SerializedName(&quot;show_info&quot;)
+@Expose
+private ShowInfo showInfo;
+<span class="fc" id="L17">@SerializedName(&quot;seating_info&quot;)</span>
+@Expose
+private List&lt;SectionInfo&gt; sectionInfoList =null;
+@SerializedName(&quot;starting_seat_id&quot;)
+@Expose
+private String startingSeatId;
+@SerializedName(&quot;status&quot;)
+@Expose
+private String status;
+@SerializedName(&quot;total_amount&quot;)
+@Expose
+private Long totalAmount;
+@SerializedName(&quot;seats_available&quot;)
+@Expose
+private Long seatsAvailable;
+@SerializedName(&quot;seats_sold&quot;)
+@Expose
+private Long seatsSold;
+@SerializedName(&quot;donated_tickets&quot;)
+@Expose
+private Long donatedTickets;
+@SerializedName(&quot;donated_and_used_tickets&quot;)
+@Expose
+private Long donatedAndUsedTickets;
+@SerializedName(&quot;donated_and_used_value&quot;)
+@Expose
+private Long donatedAndUsedValue;
+@SerializedName(&quot;occupancy&quot;)
+@Expose
+private String occupancy;
+/**
+* No args constructor for use in serialization
+* 
+*/ 
+
+public Shows(Shows shows)
+<span class="fc" id="L53">{</span>
+<span class="fc" id="L54">	this.wid=shows.wid;</span>
+<span class="fc" id="L55">	this.showInfo = new ShowInfo(shows.showInfo);</span>
+<span class="fc" id="L56">	this.sectionInfoList=new ArrayList&lt;SectionInfo&gt;();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">	for(SectionInfo sectionInfo:shows.sectionInfoList)</span>
+	{
+<span class="fc" id="L59">		SectionInfo sectionInfoNew = new SectionInfo(sectionInfo);</span>
+<span class="fc" id="L60">		this.sectionInfoList.add(sectionInfoNew);</span>
+<span class="fc" id="L61">	}</span>
+<span class="fc" id="L62">	this.status=shows.status;</span>
+<span class="fc" id="L63">	this.startingSeatId =shows.startingSeatId;</span>
+<span class="fc" id="L64">	this.totalAmount=shows.totalAmount;</span>
+<span class="fc" id="L65">	this.seatsAvailable=shows.seatsAvailable;</span>
+<span class="fc" id="L66">	this.seatsSold=shows.seatsSold;</span>
+<span class="fc" id="L67">	this.donatedTickets=shows.donatedTickets;</span>
+<span class="fc" id="L68">	this.donatedAndUsedTickets=shows.donatedAndUsedTickets;</span>
+<span class="fc" id="L69">	this.donatedAndUsedValue=shows.donatedAndUsedValue;</span>
+<span class="fc" id="L70">	this.occupancy=shows.occupancy;</span>
+<span class="fc" id="L71">}</span>
+
+<span class="fc" id="L73">public Shows() {</span>
+<span class="fc" id="L74">}</span>
+
+public Shows(String wid, ShowInfo showInfo, Long seatsAvailable, Long seatsSold, String occupancy) {
+<span class="fc" id="L77">super();</span>
+<span class="fc" id="L78">this.wid = wid;</span>
+<span class="fc" id="L79">this.showInfo = showInfo;</span>
+<span class="fc" id="L80">this.seatsAvailable = seatsAvailable;</span>
+<span class="fc" id="L81">this.seatsSold = seatsSold;</span>
+<span class="fc" id="L82">this.occupancy = occupancy;</span>
+<span class="fc" id="L83">}</span>
+
+/**
+* 
+* @param showInfo
+* @param sid
+* @param price
+* @param wid
+* @param seating
+* @param sectionName
+*/
+public Shows(String wid, ShowInfo showInfo, String sid, String sectionName, Long price,List&lt;SectionInfo&gt; sectionInfo) {
+<span class="fc" id="L95">super();</span>
+<span class="fc" id="L96">this.wid = wid;</span>
+<span class="fc" id="L97">this.showInfo = showInfo;</span>
+<span class="fc" id="L98">this.sectionInfoList= sectionInfo;</span>
+<span class="fc" id="L99">}</span>
+
+/**
+* 
+* @param showInfo
+* @param seatsSold
+* @param donatedTickets
+* @param seatsAvailable
+* @param wid
+* @param donatedAndUsedTickets
+* @param donatedAndUsedValue
+*/
+public Shows(String wid, ShowInfo showInfo, Long seatsAvailable, Long seatsSold, Long donatedTickets, Long donatedAndUsedTickets, Long donatedAndUsedValue) {
+<span class="fc" id="L112">super();</span>
+<span class="fc" id="L113">this.wid = wid;</span>
+<span class="fc" id="L114">this.showInfo = showInfo;</span>
+<span class="fc" id="L115">this.seatsAvailable = seatsAvailable;</span>
+<span class="fc" id="L116">this.seatsSold = seatsSold;</span>
+<span class="fc" id="L117">this.donatedTickets = donatedTickets;</span>
+<span class="fc" id="L118">this.donatedAndUsedTickets = donatedAndUsedTickets;</span>
+<span class="fc" id="L119">this.donatedAndUsedValue = donatedAndUsedValue;</span>
+<span class="fc" id="L120">}</span>
+public String getWid() {
+<span class="fc" id="L122">return wid;</span>
+}
+
+public void setWid(String wid) {
+<span class="fc" id="L126">this.wid = wid;</span>
+<span class="fc" id="L127">}</span>
+
+public ShowInfo getShowInfo() {
+<span class="fc" id="L130">return showInfo;</span>
+}
+
+public void setShowInfo(ShowInfo showInfo) {
+<span class="fc" id="L134">this.showInfo = showInfo;</span>
+<span class="fc" id="L135">}</span>
+
+public List&lt;SectionInfo&gt; getSectionInfo() {
+<span class="fc" id="L138">	return sectionInfoList;</span>
+}
+
+public void setSectionInfo(List&lt;SectionInfo&gt; sectionInfo) {
+<span class="fc" id="L142">	this.sectionInfoList = sectionInfo;</span>
+<span class="fc" id="L143">}</span>
+
+public Long getSeatsAvailable() {
+<span class="fc" id="L146">return seatsAvailable;</span>
+}
+
+public void setSeatsAvailable(Long seatsAvailable) {
+<span class="fc" id="L150">this.seatsAvailable = seatsAvailable;</span>
+<span class="fc" id="L151">}</span>
+
+public Long getSeatsSold() {
+<span class="fc" id="L154">return seatsSold;</span>
+}
+
+public void setSeatsSold(Long seatsSold) {
+<span class="fc" id="L158">this.seatsSold = seatsSold;</span>
+<span class="fc" id="L159">}</span>
+
+public Long getDonatedTickets() {
+<span class="fc" id="L162">return donatedTickets;</span>
+}
+
+public void setDonatedTickets(Long donatedTickets) {
+<span class="fc" id="L166">this.donatedTickets = donatedTickets;</span>
+<span class="fc" id="L167">}</span>
+
+public Long getDonatedAndUsedTickets() {
+<span class="fc" id="L170">return donatedAndUsedTickets;</span>
+}
+
+public void setDonatedAndUsedTickets(Long donatedAndUsedTickets) {
+<span class="fc" id="L174">this.donatedAndUsedTickets = donatedAndUsedTickets;</span>
+<span class="fc" id="L175">}</span>
+
+public Long getDonatedAndUsedValue() {
+<span class="fc" id="L178">return donatedAndUsedValue;</span>
+}
+ 
+public void setDonatedAndUsedValue(Long donatedAndUsedValue) {
+<span class="fc" id="L182">this.donatedAndUsedValue = donatedAndUsedValue;</span>
+<span class="fc" id="L183">}</span>
+
+public String getOccupancy() {
+<span class="fc" id="L186">return occupancy;</span>
+}
+
+public void setOccupancy(String occupancy) {
+<span class="fc" id="L190">this.occupancy = occupancy;</span>
+<span class="fc" id="L191">}</span>
+
+public String getStartingSeatId() {
+<span class="fc" id="L194">return startingSeatId;</span>
+}
+
+public void setStartingSeatId(String startingSeatId) {
+<span class="fc" id="L198">this.startingSeatId = startingSeatId;</span>
+<span class="fc" id="L199">}</span>
+
+public String getStatus() {
+<span class="fc" id="L202">return status;</span>
+}
+
+public void setStatus(String status) {
+<span class="fc" id="L206">this.status = status;</span>
+<span class="fc" id="L207">}</span>
+
+public Long getTotalAmount() {
+<span class="fc" id="L210">return totalAmount;</span>
+}
+
+public void setTotalAmount(Long totalAmount) {
+<span class="fc" id="L214">this.totalAmount = totalAmount;</span>
+<span class="fc" id="L215">}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

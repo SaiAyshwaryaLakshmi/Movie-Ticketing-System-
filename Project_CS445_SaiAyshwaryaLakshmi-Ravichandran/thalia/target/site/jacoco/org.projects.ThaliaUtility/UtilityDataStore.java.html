@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>UtilityDataStore.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.ThaliaUtility</a> &gt; <span class="el_source">UtilityDataStore.java</span></div><h1>UtilityDataStore.java</h1><pre class="source lang-java linenums">package org.projects.ThaliaUtility;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.projects.Thalia.Donations;
+import org.projects.Thalia.OrdersSectionReceipt;
+import org.projects.Thalia.Report;
+import org.projects.Thalia.Shows;
+import org.projects.Thalia.TheatreSection;
+import org.projects.Thalia.Tickets;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+ 
+<span class="nc" id="L28">public class UtilityDataStore {</span>
+
+<span class="fc" id="L30">	public static Map&lt;String,Shows&gt; showsMap = new HashMap&lt;String,Shows&gt;();</span>
+<span class="fc" id="L31">	public static Map&lt;String,TheatreSection&gt; theatreSectionMap = new HashMap&lt;String,TheatreSection&gt;();</span>
+<span class="fc" id="L32">	public static Map&lt;String,OrdersSectionReceipt&gt; ordersSectionReceiptMap = new HashMap&lt;String,OrdersSectionReceipt&gt;();</span>
+<span class="fc" id="L33">	public static Map&lt;String, Donations&gt; donationsMap = new HashMap&lt;String,Donations&gt;();</span>
+<span class="fc" id="L34">	public static Map&lt;String,Tickets&gt; ticketsMap = new HashMap&lt;String,Tickets&gt;();</span>
+<span class="fc" id="L35">	public static List&lt;String&gt; subscriptionList = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L36">	public static Map&lt;String,Report&gt; reportsMap = new HashMap&lt;String,Report&gt;();</span>
+<span class="fc" id="L37">    public static Map&lt;String,String&gt;responseMap = new HashMap&lt;String,String&gt;();</span>
+	
+	 
+	public static void initializeReportsMap()
+	{
+<span class="fc bfc" id="L42" title="All 2 branches covered.">		if(UtilityDataStore.reportsMap.size()&lt;1)</span>
+		{
+<span class="fc" id="L44">		String[] reportNames = {&quot;Theatre occupancy&quot;,&quot;Revenue from ticket sales&quot;,&quot;Donated tickets report&quot;};</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">		for(String s :reportNames)</span>
+		{
+<span class="fc" id="L47">			Report report = new Report();</span>
+<span class="fc" id="L48">			report.setMrid(UniqueIdGenerator.getReportId().toString());</span>
+<span class="fc" id="L49">			report.setName(s);</span>
+<span class="fc" id="L50">			report.setDonatedAndUsedTickets((long) 0);</span>
+<span class="fc" id="L51">			report.setDonatedAndUsedValue((long) 0);</span>
+<span class="fc" id="L52">			report.setDonatedTickets((long) 0);</span>
+<span class="fc" id="L53">			report.setSoldSeats((long) 0);</span>
+<span class="fc" id="L54">			report.setTotalSeats((long) 0);</span>
+<span class="fc" id="L55">			report.setOverallRevenue((long) 0);</span>
+<span class="fc" id="L56">			reportsMap.put(report.getMrid(), report);</span>
+		}
+		}
+<span class="fc" id="L59">	} </span>
+	
+	public static void initializeTheatreSection()
+	{
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">		if(UtilityDataStore.theatreSectionMap.size()&lt;1)</span>
+		{
+<span class="nc" id="L65">		String json = null;</span>
+		try {
+<span class="nc" id="L67">			File test = new File(&quot;./&quot;);</span>
+<span class="nc" id="L68">			ClassLoader classLoader = UtilityDataStore.class.getClassLoader();</span>
+<span class="nc" id="L69">			json = FileUtils.readFileToString(</span>
+<span class="nc" id="L70">					new File(classLoader.getResource(&quot;Theatre.JSON&quot;).getFile()));</span>
+			
+<span class="nc" id="L72">		} catch (Exception e) {</span>
+			// TODO Auto-generated catch block
+<span class="nc" id="L74">			e.printStackTrace();</span>
+<span class="nc" id="L75">		}</span>
+<span class="nc" id="L76">		java.lang.reflect.Type listType = new TypeToken&lt;ArrayList&lt;TheatreSection&gt;&gt;() {</span>
+<span class="nc" id="L77">		}.getType();</span>
+<span class="nc" id="L78">		Gson gson = new Gson();</span>
+<span class="nc" id="L79">		List&lt;TheatreSection&gt; theatreSectionList = gson.fromJson(json, listType);</span>
+	
+<span class="nc bnc" id="L81" title="All 2 branches missed.">		for (TheatreSection t : theatreSectionList) {</span>
+<span class="nc" id="L82">			t.setSid(UniqueIdGenerator.getUniqueID().toString());</span>
+<span class="nc" id="L83">			UtilityDataStore.theatreSectionMap.put(t.getSid(), t);</span>
+<span class="nc" id="L84">		}</span>
+	}
+	
+<span class="fc" id="L87">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

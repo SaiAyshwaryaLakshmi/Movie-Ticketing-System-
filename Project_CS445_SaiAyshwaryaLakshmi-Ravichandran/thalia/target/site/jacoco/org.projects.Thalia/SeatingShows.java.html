@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SeatingShows.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.Thalia</a> &gt; <span class="el_source">SeatingShows.java</span></div><h1>SeatingShows.java</h1><pre class="source lang-java linenums">package org.projects.Thalia;
+
+	import java.util.ArrayList;
+import java.util.List;
+	import com.google.gson.annotations.Expose;
+	import com.google.gson.annotations.SerializedName;
+
+	public class SeatingShows {
+
+	@SerializedName(&quot;wid&quot;)
+	@Expose
+	private String wid;
+	@SerializedName(&quot;show_info&quot;)
+	@Expose
+	private ShowInfo showInfo;
+	@SerializedName(&quot;sid&quot;)
+	@Expose
+	private String sid;
+	@SerializedName(&quot;section_name&quot;)
+	@Expose
+	private String sectionName;
+	@SerializedName(&quot;starting_seat_id&quot;)
+	@Expose
+	private String startingSeatId;
+	@SerializedName(&quot;status&quot;)
+	@Expose
+	private String status;
+	@SerializedName(&quot;total_amount&quot;)
+	@Expose
+	private Integer totalAmount;
+<span class="fc" id="L31">	@SerializedName(&quot;seating&quot;)</span>
+	@Expose
+	private List&lt;Seating&gt; seating = null;
+	
+	public SeatingShows(Shows shows)
+<span class="fc" id="L36">	{</span>
+<span class="fc" id="L37">		this.wid=shows.getWid();</span>
+<span class="fc" id="L38">		this.showInfo = new ShowInfo(shows.getShowInfo());</span>
+<span class="fc" id="L39">		List&lt;SectionInfo&gt; sectionInfoList=new ArrayList&lt;SectionInfo&gt;();</span>
+<span class="fc" id="L40">		this.seating = new ArrayList&lt;Seating&gt;();</span>
+<span class="fc" id="L41">		this.startingSeatId = shows.getStartingSeatId();</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">		for(SectionInfo sectionInfo:shows.getSectionInfo())</span>
+		{
+<span class="fc" id="L44">			SectionInfo sectionInfoNew = new SectionInfo(sectionInfo);</span>
+<span class="fc" id="L45">			sectionInfoList.add(sectionInfoNew);</span>
+<span class="fc" id="L46">		}</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">		if(sectionInfoList.size()&gt;0)</span>
+			
+		{
+<span class="fc bfc" id="L50" title="All 2 branches covered.">		for(Seating seating:sectionInfoList.get(0).getSeating())</span>
+		{
+<span class="fc" id="L52">			Seating seatingNew = new Seating(seating);</span>
+<span class="fc" id="L53">			this.seating.add(seatingNew);</span>
+		
+<span class="fc" id="L55">		}</span>
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">		if(shows.getStartingSeatId()!=null&amp;&amp;shows.getStartingSeatId().equals(&quot;&quot;))</span>
+		{
+<span class="nc bnc" id="L58" title="All 4 branches missed.">		if(seating.size()&gt;0&amp;&amp;seating.get(0).getSeats().size()&gt;0)</span>
+		{
+<span class="nc" id="L60">		this.startingSeatId=seating.get(0).getSeats().get(0).getCid();</span>
+		}
+		
+		}
+		
+<span class="fc" id="L65">		this.sid = sectionInfoList.get(0).getSid();</span>
+<span class="fc" id="L66">		this.sectionName=sectionInfoList.get(0).getSectionName();</span>
+		}
+
+<span class="fc" id="L69">		this.status=shows.getStatus();</span>
+<span class="fc" id="L70">		this.totalAmount=shows.getTotalAmount().intValue();</span>
+	
+<span class="fc" id="L72">	}</span>
+
+	public String getWid() {
+<span class="nc" id="L75">	return wid;</span>
+	}
+
+	public void setWid(String wid) {
+<span class="fc" id="L79">	this.wid = wid;</span>
+<span class="fc" id="L80">	}</span>
+
+	public ShowInfo getShowInfo() {
+<span class="nc" id="L83">	return showInfo;</span>
+	}
+
+	public void setShowInfo(ShowInfo showInfo) {
+<span class="fc" id="L87">	this.showInfo = showInfo;</span>
+<span class="fc" id="L88">	}</span>
+
+	public String getSid() {
+<span class="nc" id="L91">	return sid;</span>
+	}
+
+	public void setSid(String sid) {
+<span class="fc" id="L95">	this.sid = sid;</span>
+<span class="fc" id="L96">	}</span>
+
+	public String getSectionName() {
+<span class="nc" id="L99">	return sectionName;</span>
+	}
+
+	public void setSectionName(String sectionName) {
+<span class="fc" id="L103">	this.sectionName = sectionName;</span>
+<span class="fc" id="L104">	}</span>
+
+	public String getStartingSeatId() {
+<span class="nc" id="L107">	return startingSeatId;</span>
+	}
+
+	public void setStartingSeatId(String startingSeatId) {
+<span class="fc" id="L111">	this.startingSeatId = startingSeatId;</span>
+<span class="fc" id="L112">	}</span>
+
+	public String getStatus() {
+<span class="nc" id="L115">	return status;</span>
+	}
+
+	public void setStatus(String status) {
+<span class="fc" id="L119">	this.status = status;</span>
+<span class="fc" id="L120">	}</span>
+
+	public Integer getTotalAmount() {
+<span class="nc" id="L123">	return totalAmount;</span>
+	}
+
+	public void setTotalAmount(Integer totalAmount) {
+<span class="fc" id="L127">	this.totalAmount = totalAmount;</span>
+<span class="fc" id="L128">	}</span>
+
+	public List&lt;Seating&gt; getSeating() {
+<span class="nc" id="L131">	return seating;</span>
+	}
+
+	public void setSeating(List&lt;Seating&gt; seating) {
+<span class="fc" id="L135">	this.seating = seating;</span>
+<span class="fc" id="L136">	}</span>
+
+	}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.projects.TestSuiteThaliaServices.OrderServicesTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 sec - in org.projects.TestSuiteThaliaServices.OrderServicesTest

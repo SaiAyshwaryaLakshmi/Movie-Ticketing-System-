@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>OrderServices.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.ThaliaServices</a> &gt; <span class="el_source">OrderServices.java</span></div><h1>OrderServices.java</h1><pre class="source lang-java linenums">package org.projects.ThaliaServices;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.projects.Thalia.Order;
+import org.projects.Thalia.OrdersReceipt;
+import org.projects.Thalia.OrdersSectionReceipt;
+import org.projects.Thalia.PatronInfo;
+import org.projects.Thalia.Seat;
+import org.projects.Thalia.Seating;
+import org.projects.Thalia.SectionInfo;
+import org.projects.Thalia.Shows;
+import org.projects.Thalia.Tickets;
+import org.projects.ThaliaUtility.ExclusionStrategyForTickets;
+import org.projects.ThaliaUtility.UtilityDataStore;
+import org.projects.ThaliaUtility.UniqueIdGenerator;
+import java.util.Locale;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+@Path(&quot;/orders&quot;)
+<span class="fc" id="L36">public class OrderServices {</span>
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postOrder(String json) {
+<span class="fc" id="L42">		Gson gson = new Gson();</span>
+<span class="fc" id="L43">		List&lt;String&gt; tickets = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L44">		PatronInfo p = new PatronInfo();</span>
+<span class="fc" id="L45">		Date today = new Date();</span>
+<span class="fc" id="L46">		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;);</span>
+<span class="fc" id="L47">	    String date = DATE_FORMAT.format(today);</span>
+<span class="fc" id="L48">		Order order = gson.fromJson(json, Order.class);</span>
+<span class="fc" id="L49">		OrdersReceipt ordersReceipt = new OrdersReceipt();</span>
+<span class="fc" id="L50">		ordersReceipt.setOid(UniqueIdGenerator.getUniqueID().toString());</span>
+<span class="fc" id="L51">		ordersReceipt.setWid(order.getWid());</span>
+<span class="fc" id="L52">		ordersReceipt.setDateOrdered(date);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">		for (int i = 0; i &lt; order.getSeats().size(); i++) {</span>
+<span class="fc" id="L54">			String s = UniqueIdGenerator.getUniqueID().toString();</span>
+<span class="fc" id="L55">			tickets.add(s);</span>
+		} 
+<span class="fc" id="L57">		Shows shows = new Shows(UtilityDataStore.showsMap.get(order.getWid()));</span>
+<span class="fc" id="L58">		ordersReceipt.setShowInfo(shows.getShowInfo());</span>
+<span class="fc" id="L59">		List&lt;SectionInfo&gt; sectionInfoList = shows.getSectionInfo();</span>
+<span class="fc" id="L60">		Integer price = null;</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">		for (SectionInfo sectionInfo : sectionInfoList) {</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">			if (sectionInfo.getSid().equalsIgnoreCase(order.getSid())) {</span>
+<span class="fc" id="L63">				price = (int) (order.getSeats().size() * sectionInfo.getPrice());</span>
+<span class="fc" id="L64">				break;</span>
+			}
+<span class="nc" id="L66">		}</span>
+<span class="fc" id="L67">		ordersReceipt.setOrderAmount(price.longValue());</span>
+<span class="fc" id="L68">		ordersReceipt.setTickets(tickets);</span>
+<span class="fc" id="L69">		String s = gson.toJson(ordersReceipt);</span>
+<span class="fc" id="L70">		addOrderToMap(ordersReceipt, order);</span>
+<span class="fc" id="L71">		return Response.status(Response.Status.CREATED).entity(s).build();</span>
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response GetOrders(@QueryParam(&quot;start_date&quot;) String startDate, @QueryParam(&quot;end_date&quot;) String endDate) {
+<span class="pc bpc" id="L77" title="2 of 4 branches missed.">		if (startDate == null || endDate == null) {</span>
+<span class="nc" id="L78">			Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="nc" id="L79">					.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getOrders&quot;)).setPrettyPrinting().create();</span>
+<span class="nc" id="L80">			String s = gson.toJson(new ArrayList(UtilityDataStore.ordersSectionReceiptMap.values()));</span>
+<span class="nc" id="L81">			return Response.status(Response.Status.OK).entity(s).build();</span>
+		} else {
+<span class="fc" id="L83">			return getOrdersByDate(startDate, endDate);</span>
+		}
+	}
+
+	public Response getOrdersByDate(String startDate, String endDate) {
+<span class="fc" id="L88">		Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L89">				.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getOrders&quot;)).setPrettyPrinting()</span>
+<span class="fc" id="L90">				.create();</span>
+		String s;
+<span class="fc" id="L92">		List&lt;OrdersSectionReceipt&gt; ordersSectionReceiptList = new ArrayList(</span>
+<span class="fc" id="L93">				UtilityDataStore.ordersSectionReceiptMap.values());</span>
+<span class="fc" id="L94">		List&lt;OrdersSectionReceipt&gt; ordersFiltered = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">		for (OrdersSectionReceipt ordersSection : ordersSectionReceiptList) {</span>
+			try {
+				
+<span class="fc" id="L98">				SimpleDateFormat orderFormatter = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.ENGLISH);</span>
+<span class="fc" id="L99">				Date orderDate = orderFormatter.parse(ordersSection.getDateOrdered()); </span>
+<span class="fc" id="L100">				SimpleDateFormat filterDate = new SimpleDateFormat(&quot;yyyyMMdd&quot;);</span>
+<span class="fc" id="L101">				Date start = filterDate.parse(startDate);</span>
+<span class="fc" id="L102">				Date end = filterDate.parse(endDate);</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">				if(start.compareTo(end)==0)</span>
+				{
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">					if (orderDate.compareTo(start) &gt;= 0) {</span>
+<span class="fc" id="L106">						ordersFiltered.add(ordersSection);</span>
+						
+						}
+				}
+				else
+				{
+<span class="pc bpc" id="L112" title="2 of 4 branches missed.">				if (orderDate.compareTo(start) &gt;= 0 &amp;&amp; orderDate.compareTo(end) &lt;= 0) {</span>
+<span class="nc" id="L113">					ordersFiltered.add(ordersSection);</span>
+					}
+				}
+				
+<span class="fc" id="L117">			} catch (Exception ex) {</span>
+<span class="fc" id="L118">				s = &quot;{\&quot;Result\&quot;:\&quot;Exception\&quot;}&quot;;</span>
+<span class="fc" id="L119">			}</span>
+<span class="fc" id="L120">		}</span>
+<span class="fc" id="L121">		s = gson.toJson(ordersFiltered);</span>
+
+<span class="fc" id="L123">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	@GET
+	@Path(&quot;{id}&quot;)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response GetSpecificOrder(@PathParam(&quot;id&quot;) String oid) {
+<span class="fc" id="L130">		Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L131">				.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getSpecificOrder&quot;)).setPrettyPrinting()</span>
+<span class="fc" id="L132">				.create();</span>
+		String s;
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">		if (UtilityDataStore.ordersSectionReceiptMap.containsKey(oid)) {</span>
+<span class="nc" id="L135">			s = gson.toJson(UtilityDataStore.ordersSectionReceiptMap.get(oid));</span>
+		} else {
+<span class="fc" id="L137">			s = &quot;{\&quot;Result\&quot;:\&quot;Notfound\&quot;}&quot;;</span>
+		}
+<span class="fc" id="L139">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	void addOrderToMap(OrdersReceipt ordersReceipt, Order order) {
+<span class="fc" id="L143">		List&lt;Tickets&gt; ticketsList = new ArrayList&lt;Tickets&gt;();</span>
+<span class="fc" id="L144">		OrdersSectionReceipt ordersSectionReceipt = new OrdersSectionReceipt();</span>
+<span class="fc" id="L145">		ordersSectionReceipt.setOid(ordersReceipt.getOid());</span>
+<span class="fc" id="L146">		ordersSectionReceipt.setWid(ordersReceipt.getWid());</span>
+<span class="fc" id="L147">		ordersSectionReceipt.setDateOrdered(ordersReceipt.getDateOrdered());</span>
+<span class="fc" id="L148">		ordersSectionReceipt.setNumberOfTickets((long) ordersReceipt.getTickets().size());</span>
+<span class="fc" id="L149">		order.getPatronInfo().setCcNumber(order.getPatronInfo().getCcNumber());</span>
+<span class="fc" id="L150">		ordersSectionReceipt.setPatronInfo(order.getPatronInfo());</span>
+<span class="fc" id="L151">		ordersSectionReceipt.setShowInfo(ordersReceipt.getShowInfo());</span>
+<span class="fc" id="L152">		ordersSectionReceipt.setOrderAmount(ordersReceipt.getOrderAmount());</span>
+<span class="fc" id="L153">		Shows shows = new Shows(UtilityDataStore.showsMap.get(order.getWid()));</span>
+<span class="fc" id="L154">		List&lt;SectionInfo&gt; sectionInfoList = shows.getSectionInfo();</span>
+<span class="fc" id="L155">		List&lt;Seating&gt; seatingSpecificList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L156">		List&lt;Seat&gt; seatSpecificList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L157">		SectionInfo sectionInfoSid = new SectionInfo();</span>
+<span class="fc" id="L158">		Seating seatingSpecific = new Seating();</span>
+<span class="fc" id="L159">		Boolean seatFound = false;</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">		for (SectionInfo sectionInfo : sectionInfoList) {</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">			if (sectionInfo.getSid().equalsIgnoreCase(order.getSid())) {</span>
+<span class="fc" id="L162">				sectionInfoSid = new SectionInfo(sectionInfo);</span>
+<span class="fc" id="L163">				break;</span>
+			}
+<span class="nc" id="L165">		}</span>
+<span class="fc" id="L166">		int i = 0;</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">		for (String t : ordersReceipt.getTickets()) {</span>
+<span class="fc" id="L168">			Tickets ticket = new Tickets();</span>
+<span class="fc" id="L169">			ticket.setPatronInfo(order.getPatronInfo());</span>
+<span class="fc" id="L170">			ticket.setPrice(sectionInfoSid.getPrice());</span>
+<span class="fc" id="L171">			ticket.setShowInfo(ordersReceipt.getShowInfo());</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">			for (Seating seating : sectionInfoSid.getSeating()) {</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">				for (Seat seat : seating.getSeats()) {</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">					if (seat.getCid().equalsIgnoreCase(order.getSeats().get(i).getCid())) {</span>
+<span class="fc" id="L175">						seatSpecificList.add(seat);</span>
+<span class="fc" id="L176">						seatFound = true;</span>
+<span class="fc" id="L177">						break;</span>
+					}
+<span class="nc" id="L179">				}</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">				if (seatFound == true) {</span>
+<span class="fc" id="L181">					seatingSpecific = new Seating(seating);</span>
+<span class="fc" id="L182">					seatingSpecific.setSeats(seatSpecificList);</span>
+<span class="fc" id="L183">					seatingSpecificList.add(seatingSpecific);</span>
+<span class="fc" id="L184">					break;</span>
+				}
+<span class="nc" id="L186">			}</span>
+
+<span class="fc" id="L188">			ticket.setSeating(seatingSpecificList);</span>
+<span class="fc" id="L189">			ticket.setSectionName(sectionInfoSid.getSectionName());</span>
+<span class="fc" id="L190">			ticket.setStatus(&quot;open&quot;);</span>
+<span class="fc" id="L191">			ticket.setTid(t);</span>
+<span class="fc" id="L192">			ticket.setSid(order.getSid());</span>
+<span class="fc" id="L193">			ticket.setWid(ordersReceipt.getWid());</span>
+<span class="fc" id="L194">			UtilityDataStore.ticketsMap.put(ticket.getTid(), ticket);</span>
+<span class="fc" id="L195">			ticketsList.add(ticket);</span>
+<span class="fc" id="L196">			i++;</span>
+<span class="fc" id="L197">			seatSpecificList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L198">			seatingSpecificList = new ArrayList();</span>
+<span class="fc" id="L199">			seatFound = false;</span>
+<span class="fc" id="L200">		}</span>
+<span class="fc" id="L201">		ordersSectionReceipt.setTickets(ticketsList);</span>
+<span class="fc" id="L202">		ReserveTickets(ticketsList, ordersReceipt.getWid());</span>
+<span class="fc" id="L203">		UtilityDataStore.ordersSectionReceiptMap.put(ordersSectionReceipt.getOid(), ordersSectionReceipt);</span>
+
+<span class="fc" id="L205">	}</span>
+
+	void ReserveTickets(List&lt;Tickets&gt; ticketList, String wid) {
+<span class="fc" id="L208">		Shows shows = UtilityDataStore.showsMap.get(wid);</span>
+<span class="fc" id="L209">		boolean isSeatFound = false;</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">		for (Tickets ticket : ticketList) {</span>
+<span class="fc" id="L211">			isSeatFound = false;</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">			for (SectionInfo sectionInfo : shows.getSectionInfo()) {</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">				if (sectionInfo.getSid().equalsIgnoreCase(ticket.getSid())) {</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">					for (Seating seating : sectionInfo.getSeating()) {</span>
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">						for (Seat seat : seating.getSeats()) {</span>
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">							if (seat.getCid().equalsIgnoreCase(ticket.getSeating().get(0).getSeats().get(0).getCid())) {</span>
+<span class="fc" id="L217">							isSeatFound = true;</span>
+<span class="fc" id="L218">								seat.setStatus(&quot;sold&quot;);</span>
+<span class="fc" id="L219">								shows.setSeatsSold(shows.getSeatsSold() + 1);</span>
+<span class="fc" id="L220">								shows.setTotalAmount(shows.getTotalAmount() + sectionInfo.getPrice());</span>
+<span class="fc" id="L221">								shows.setOccupancy(</span>
+<span class="fc" id="L222">										new Float((float) ((shows.getSeatsSold() * 100) / shows.getSeatsAvailable()))</span>
+<span class="fc" id="L223">												.toString() + &quot;%&quot;);</span>
+<span class="fc" id="L224">								break;</span>
+							}
+<span class="nc" id="L226">						}</span>
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">						if (isSeatFound)</span>
+<span class="fc" id="L228">							break;</span>
+<span class="nc" id="L229">					}</span>
+<span class="fc" id="L230">					sectionInfo.setSeatsSold(sectionInfo.getSeatsSold()+1);</span>
+<span class="fc" id="L231">					sectionInfo.setSectionRevenue(sectionInfo.getSectionRevenue()+sectionInfo.getPrice());</span>
+<span class="fc" id="L232">					break;</span>
+				}
+<span class="nc" id="L234">			}</span>
+<span class="fc" id="L235">		}</span>
+<span class="fc" id="L236">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

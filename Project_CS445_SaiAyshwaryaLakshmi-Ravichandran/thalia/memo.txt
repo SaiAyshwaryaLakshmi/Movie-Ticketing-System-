@@ -1,0 +1,18 @@
+. Link to bitbucket account https://saiayshwarya@bitbucket.org/saiayshwarya/sai-ayshwaryalakshmi-ravichandran-cs445.git
+
+2. EclEmma JAVA code Coverage 3.0.1 - 78.7%code coverage
+     Jacoco JAVA Code Coverage - 61 %
+
+3. No of hours worked on code : 168 hours
+
+4: No of hours woked on setting up submission : 32 hours
+
+5. Challenges faced : Difficulty testing REST controllers. 
+Initial challenges difficulty understanding the expected response.
+Time Constraint was also making the process difficult.
+
+There are not many design patterns used int he project only a few that where in-built was used.
+
+Strategy pattern was implemented in one of the exclusion Strategy files of the program though the interface was in a predefined library.
+
+6. The code works perfectly fine after repeated tests and no functionality has been missed. 

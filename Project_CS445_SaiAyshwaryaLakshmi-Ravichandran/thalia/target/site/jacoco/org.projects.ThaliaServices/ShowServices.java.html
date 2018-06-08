@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ShowServices.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.ThaliaServices</a> &gt; <span class="el_source">ShowServices.java</span></div><h1>ShowServices.java</h1><pre class="source lang-java linenums">package org.projects.ThaliaServices;
+
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.json.Json;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONML;
+import org.json.JSONObject;
+import org.projects.Thalia.Donations;
+import org.projects.Thalia.Seat;
+import org.projects.Thalia.Seating;
+import org.projects.Thalia.SeatingShows;
+import org.projects.Thalia.SectionInfo;
+import org.projects.Thalia.ShowSections;
+import org.projects.Thalia.Shows;
+import org.projects.Thalia.TheatreSeating;
+import org.projects.Thalia.TheatreSection;
+import org.projects.Thalia.Tickets;
+import org.projects.ThaliaUtility.ExclusionStrategyForTickets;
+import org.projects.ThaliaUtility.UtilityDataStore;
+import org.projects.ThaliaUtility.UniqueIdGenerator;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+@Path(&quot;/shows&quot;)
+<span class="fc" id="L63">public class ShowServices {</span>
+
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response createShow(String json) {
+<span class="fc" id="L68">		Gson gson = new Gson();</span>
+<span class="fc" id="L69">		Shows showsFromRequest = gson.fromJson(json, Shows.class);</span>
+<span class="fc" id="L70">		showsFromRequest.setWid(UniqueIdGenerator.getUniqueID().toString());</span>
+<span class="fc" id="L71">		List&lt;SectionInfo&gt; sectionInfoList = showsFromRequest.getSectionInfo();</span>
+<span class="fc" id="L72">		Integer seatCount = 0;</span>
+<span class="pc bpc" id="L73" title="2 of 4 branches missed.">		if(null!=sectionInfoList&amp;&amp;sectionInfoList.size()&gt;0)</span>
+		{
+<span class="fc bfc" id="L75" title="All 2 branches covered.">			for (SectionInfo info : sectionInfoList) {</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">				if(UtilityDataStore.theatreSectionMap.get(info.getSid())!=null) {</span>
+<span class="fc" id="L77">					TheatreSection theatreSection = UtilityDataStore.theatreSectionMap.get(info.getSid());</span>
+<span class="fc" id="L78">					info.setSectionName((theatreSection).getSectionName());</span>
+<span class="fc" id="L79">					info.setSeatsSold((long)0);</span>
+<span class="fc" id="L80">					info.setSectionRevenue((long)0);</span>
+<span class="fc" id="L81">					info.setSeatsAvailable((long)0);</span>
+<span class="fc" id="L82">					List&lt;Seating&gt; seatingList = new ArrayList&lt;Seating&gt;();</span>
+<span class="fc" id="L83">					Seating seating = new Seating();</span>
+					List&lt;Seat&gt; seatList;
+					Seat seat;
+<span class="fc" id="L86">					List&lt;TheatreSeating&gt; theatreSeatingList = UtilityDataStore.theatreSectionMap.get(info.getSid())</span>
+<span class="fc" id="L87">							.getSeating();</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">					for (TheatreSeating t : theatreSeatingList) {</span>
+<span class="nc" id="L89">						seatList = new ArrayList&lt;Seat&gt;();</span>
+<span class="nc" id="L90">						seating = new Seating();</span>
+<span class="nc" id="L91">						seating.setRow(t.getRow());</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">						for (String s : t.getSeats()) {</span>
+<span class="nc" id="L93">							seatCount++;</span>
+<span class="nc" id="L94">							seat = new Seat();</span>
+<span class="nc" id="L95">							seat.setCid(UniqueIdGenerator.getUniqueID().toString());</span>
+<span class="nc" id="L96">							seat.setSeat(s);</span>
+<span class="nc" id="L97">							seat.setStatus(&quot;available&quot;);</span>
+<span class="nc" id="L98">							seatList.add(seat);</span>
+<span class="nc" id="L99">						}</span>
+<span class="nc" id="L100">						info.setSeatsAvailable(info.getSeatsAvailable()+seatList.size());</span>
+<span class="nc" id="L101">						seating.setSeats(seatList);</span>
+<span class="nc" id="L102">						seatingList.add(seating);</span>
+<span class="nc" id="L103">					}</span>
+<span class="fc" id="L104">					info.setSeating(seatingList);</span>
+<span class="fc" id="L105">				}else {</span>
+<span class="nc" id="L106">					return Response.status(400).build();</span>
+				}
+<span class="fc" id="L108">			}</span>
+		}
+<span class="fc" id="L110">		showsFromRequest.setSectionInfo(sectionInfoList);</span>
+<span class="fc" id="L111">		showsFromRequest.setTotalAmount(new Long(0));</span>
+<span class="fc" id="L112">		showsFromRequest.setDonatedAndUsedTickets(new Long(0));</span>
+<span class="fc" id="L113">		showsFromRequest.setDonatedAndUsedValue(new Long(0));</span>
+<span class="fc" id="L114">		showsFromRequest.setDonatedTickets(new Long(0));</span>
+<span class="fc" id="L115">		showsFromRequest.setOccupancy(&quot;0 %&quot;);</span>
+<span class="fc" id="L116">		showsFromRequest.setSeatsSold(new Long(0));</span>
+<span class="fc" id="L117">		showsFromRequest.setSeatsAvailable(new Long(seatCount));</span>
+<span class="fc" id="L118">		UtilityDataStore.showsMap.put(showsFromRequest.getWid(), showsFromRequest);</span>
+<span class="fc" id="L119">		return Response.status(Response.Status.CREATED).entity(&quot;{\&quot;wid\&quot;:&quot; + &quot;\&quot;&quot; + showsFromRequest.getWid() + &quot;\&quot;&quot; + &quot;}&quot;)</span>
+<span class="fc" id="L120">				.build();</span>
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAllShows() {
+
+<span class="fc" id="L127">		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategyForTickets(&quot;allShow&quot;))</span>
+<span class="fc" id="L128">				.setPrettyPrinting().create();</span>
+<span class="fc" id="L129">		String s = gson.toJson(new ArrayList(UtilityDataStore.showsMap.values()));</span>
+<span class="fc" id="L130">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	@GET
+	@Path(&quot;{id}&quot;)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getShow(@PathParam(&quot;id&quot;) String wid) {
+		// calls the &quot;Get All Lamps&quot; use case
+<span class="fc" id="L138">		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getShow&quot;))</span>
+<span class="fc" id="L139">				.setPrettyPrinting().create();</span>
+		String s;
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">		if (UtilityDataStore.showsMap.containsKey(wid)) {</span>
+<span class="nc" id="L142">			s = gson.toJson(UtilityDataStore.showsMap.get(wid));</span>
+		} else {
+<span class="fc" id="L144">			s = &quot;{\&quot;Result\&quot;:\&quot;Notfound\&quot;}&quot;;</span>
+		}
+<span class="fc" id="L146">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	@PUT
+	@Path(&quot;{id}&quot;)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response UpdateShow(@PathParam(&quot;id&quot;) String wid, String json) throws FileNotFoundException {
+<span class="nc" id="L153">		Gson gson = new Gson();</span>
+<span class="nc" id="L154">		Shows showsFromRequest = gson.fromJson(json, Shows.class);</span>
+<span class="nc" id="L155">		List&lt;SectionInfo&gt; sectionInfoList = showsFromRequest.getSectionInfo();</span>
+
+<span class="nc bnc" id="L157" title="All 2 branches missed.">		if (UtilityDataStore.showsMap.containsKey(wid)) {</span>
+<span class="nc" id="L158">			Shows updateShows = new Shows(UtilityDataStore.showsMap.get(wid));</span>
+<span class="nc" id="L159">			updateShows.setShowInfo(showsFromRequest.getShowInfo());</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">			for (SectionInfo sectionInfo : sectionInfoList) {</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">				for (SectionInfo sectionInfoSpecific : updateShows.getSectionInfo()) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">					if (sectionInfoSpecific.getSid().equalsIgnoreCase(sectionInfo.getSid())) {</span>
+<span class="nc" id="L163">						sectionInfoSpecific.setPrice(sectionInfo.getPrice());</span>
+<span class="nc" id="L164">						break;</span>
+					}
+<span class="nc" id="L166">				}</span>
+<span class="nc" id="L167">			}</span>
+<span class="nc" id="L168">			UtilityDataStore.showsMap.put(wid, updateShows);</span>
+			/*JsonObject jsonObject = new JsonObject();*/
+<span class="nc" id="L170">			String s = gson.toJson(UtilityDataStore.responseMap);</span>
+			/*String e = s.replace(&quot;{&quot;, &quot;&quot;);
+			String r = e.replace(&quot;}&quot;, &quot;&quot;);*/
+<span class="nc" id="L173">			return Response.status(Response.Status.OK).entity(s).build();</span>
+		} else {
+<span class="nc" id="L175">			return Response.status(Response.Status.NOT_FOUND).build();</span>
+		}
+
+	}
+
+	@GET
+	@Path(&quot;{id}/sections&quot;)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getShowSection(@PathParam(&quot;id&quot;) String wid) {
+		// calls the &quot;Get All Lamps&quot; use case
+<span class="fc" id="L185">		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getShowSection&quot;))</span>
+<span class="fc" id="L186">				.setPrettyPrinting().create();</span>
+		String s;
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">		if (UtilityDataStore.showsMap.containsKey(wid)) {</span>
+<span class="nc" id="L189">			s = gson.toJson(UtilityDataStore.showsMap.get(wid).getSectionInfo());</span>
+		} else {
+<span class="fc" id="L191">			s = &quot;{\&quot;Result\&quot;:\&quot;Notfound\&quot;}&quot;;</span>
+		}
+<span class="fc" id="L193">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	@POST
+	@Path(&quot;{id}/donations&quot;)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response setDonations(@PathParam(&quot;id&quot;) String wid, String json) {
+
+<span class="fc" id="L202">		Gson gson = new Gson();</span>
+<span class="fc" id="L203">		Donations donation = gson.fromJson(json, Donations.class);</span>
+		//Donations donation = new Donations();
+<span class="fc" id="L205">		donation.setDid(UniqueIdGenerator.getUniqueID().toString());</span>
+<span class="fc" id="L206">		donation.setTickets(new ArrayList&lt;String&gt;());</span>
+<span class="fc" id="L207">		donation.setStatus(&quot;pending&quot;);</span>
+<span class="fc" id="L208">		UtilityDataStore.donationsMap.put(donation.getDid(), donation);</span>
+<span class="fc" id="L209">		String s = gson.toJson(donation.getDid());</span>
+<span class="fc" id="L210">		return Response.status(Response.Status.CREATED).entity(&quot;{\&quot;did\&quot;:&quot; + &quot;\&quot;&quot; +donation.getDid()+&quot;\&quot;&quot; + &quot;}&quot; ).build();</span>
+	}
+
+
+	@GET
+	@Path(&quot;{id}/donations/{did}&quot;)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getDonations(@PathParam(&quot;id&quot;) String wid, @PathParam(&quot;did&quot;) String did) {
+
+<span class="fc" id="L220">		Gson gson = new GsonBuilder().setPrettyPrinting().create();</span>
+		String s;
+<span class="fc" id="L222">		List&lt;String&gt; ticketList = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L223">		List&lt;String&gt; specificTicketList = new ArrayList&lt;String&gt;();</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">		for (String tk : UtilityDataStore.subscriptionList) {</span>
+<span class="nc" id="L225">			ticketList.add(tk);</span>
+<span class="nc" id="L226">		}</span>
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">		if (UtilityDataStore.donationsMap.containsKey(did)) {</span>
+<span class="nc" id="L228">			Donations donation = UtilityDataStore.donationsMap.get(did);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">			if (donation.getStatus().equalsIgnoreCase(&quot;pending&quot;)) {</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">				if (ticketList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">					for (int i = 0; i &lt; ticketList.size(); i++) {</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">						if (!(donation.getCount() == i)) {</span>
+<span class="nc" id="L233">							specificTicketList.add(ticketList.get(i));</span>
+<span class="nc" id="L234">							UpdateDonatedTicket(ticketList.get(i));</span>
+<span class="nc" id="L235">							UtilityDataStore.subscriptionList.remove(0);</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">						} else if ((donation.getCount() == i)) {</span>
+<span class="nc" id="L237">							break;</span>
+						}
+					}
+<span class="nc" id="L240">					donation.setStatus(&quot;assigned&quot;);</span>
+<span class="nc" id="L241">					donation.setTickets(specificTicketList);</span>
+				}
+			}
+<span class="nc" id="L244">			s = gson.toJson(UtilityDataStore.donationsMap.get(did));</span>
+<span class="nc" id="L245">		} else {</span>
+<span class="fc" id="L246">			s = &quot;{\&quot;Result\&quot;:\&quot;Notfound\&quot;}&quot;;</span>
+		}
+<span class="fc" id="L248">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	private void UpdateDonatedTicket(String ticket) {
+
+<span class="nc" id="L253">		Shows shows = UtilityDataStore.showsMap.get(UtilityDataStore.ticketsMap.get(ticket).getWid());</span>
+<span class="nc" id="L254">		boolean isSeatFound = false;</span>
+<span class="nc" id="L255">		shows.setDonatedTickets(shows.getDonatedTickets() + 1);</span>
+<span class="nc" id="L256">		shows.setDonatedAndUsedTickets(shows.getDonatedAndUsedTickets() + 1);</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">		for (SectionInfo sectionInfo : shows.getSectionInfo()) {</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">			if (sectionInfo.getSid().equalsIgnoreCase(UtilityDataStore.ticketsMap.get(ticket).getSid())) {</span>
+<span class="nc" id="L260">				shows.setDonatedAndUsedValue(shows.getDonatedAndUsedValue() + sectionInfo.getPrice());</span>
+<span class="nc" id="L261">				break;</span>
+			}
+<span class="nc" id="L263">		}</span>
+
+<span class="nc" id="L265">	}</span>
+
+	@GET
+	@Path(&quot;{id}/sections/{sid}&quot;)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getShowSpecificSection(@PathParam(&quot;id&quot;) String wid, @PathParam(&quot;sid&quot;) String sid) {
+		// calls the &quot;Get All Lamps&quot; use case
+<span class="fc" id="L272">		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getSectionID&quot;))</span>
+<span class="fc" id="L273">				.setPrettyPrinting().create();</span>
+		String s;
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">		if (UtilityDataStore.showsMap.containsKey(wid)) {</span>
+<span class="nc" id="L276">			Shows shows = new Shows(UtilityDataStore.showsMap.get(wid));</span>
+
+<span class="nc" id="L278">			List&lt;SectionInfo&gt; sectionInfoList = shows.getSectionInfo();</span>
+<span class="nc" id="L279">			List&lt;SectionInfo&gt; sectionInfoSpecificList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">			for (SectionInfo sectionInfo : sectionInfoList) {</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">				if (sectionInfo.getSid().equalsIgnoreCase(sid)) {</span>
+<span class="nc" id="L282">					sectionInfoSpecificList.add(sectionInfo);</span>
+<span class="nc" id="L283">					shows.setSectionInfo(sectionInfoSpecificList);</span>
+<span class="nc" id="L284">					break;</span>
+				}
+<span class="nc" id="L286">			}</span>
+<span class="nc" id="L287">			ShowSections show = new ShowSections(shows);</span>
+<span class="nc" id="L288">			s = gson.toJson(show);</span>
+<span class="nc" id="L289">		} else {</span>
+<span class="fc" id="L290">			s = &quot;{\&quot;Result\&quot;:\&quot;Notfound\&quot;}&quot;;</span>
+<span class="fc" id="L291">			return Response.status(Response.Status.NOT_FOUND).entity(s).build();</span>
+		}
+<span class="nc" id="L293">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	@PostConstruct
+	public void postConstruct() {
+<span class="nc" id="L298">		UtilityDataStore.initializeTheatreSection();</span>
+<span class="nc" id="L299">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

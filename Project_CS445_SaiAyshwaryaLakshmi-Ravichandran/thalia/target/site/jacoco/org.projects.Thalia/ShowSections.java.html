@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ShowSections.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.Thalia</a> &gt; <span class="el_source">ShowSections.java</span></div><h1>ShowSections.java</h1><pre class="source lang-java linenums">package org.projects.Thalia;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class ShowSections {
+
+@SerializedName(&quot;wid&quot;)
+@Expose
+private String wid;
+@SerializedName(&quot;show_info&quot;)
+@Expose
+private ShowInfo showInfo;
+@SerializedName(&quot;sid&quot;)
+@Expose
+private String sid;
+@SerializedName(&quot;section_name&quot;)
+@Expose
+private String sectionName;
+@SerializedName(&quot;price&quot;)
+@Expose
+private Integer price;
+<span class="fc" id="L26">@SerializedName(&quot;seating&quot;)</span>
+@Expose
+private List&lt;Seating&gt; seating = null;
+
+public ShowSections(Shows shows)
+<span class="fc" id="L31">{</span>
+<span class="fc" id="L32">	this.wid=shows.getWid();</span>
+<span class="fc" id="L33">	this.showInfo = new ShowInfo(shows.getShowInfo());</span>
+<span class="fc" id="L34">	List&lt;SectionInfo&gt; sectionInfoList=new ArrayList&lt;SectionInfo&gt;();</span>
+<span class="fc" id="L35">	this.seating = new ArrayList&lt;Seating&gt;();</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">	for(SectionInfo sectionInfo:shows.getSectionInfo())</span>
+	{
+<span class="nc" id="L38">		SectionInfo sectionInfoNew = new SectionInfo(sectionInfo);</span>
+<span class="nc" id="L39">		sectionInfoList.add(sectionInfoNew);</span>
+<span class="nc" id="L40">	}</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">	if(sectionInfoList.size()&gt;0)</span>
+		
+	{
+<span class="nc bnc" id="L44" title="All 2 branches missed.">	for(Seating seating:sectionInfoList.get(0).getSeating())</span>
+	{
+<span class="nc" id="L46">		Seating seatingNew = new Seating(seating);</span>
+<span class="nc" id="L47">		this.seating.add(seatingNew);</span>
+	
+<span class="nc" id="L49">	}</span>
+	
+<span class="nc" id="L51">	this.sid = sectionInfoList.get(0).getSid();</span>
+<span class="nc" id="L52">	this.sectionName=sectionInfoList.get(0).getSectionName();</span>
+<span class="nc" id="L53">	this.price = sectionInfoList.get(0).getPrice().intValue();</span>
+	}
+
+<span class="fc" id="L56">}</span>
+
+public String getWid() {
+<span class="fc" id="L59">return wid;</span>
+}
+
+public void setWid(String wid) {
+<span class="fc" id="L63">this.wid = wid;</span>
+<span class="fc" id="L64">}</span>
+
+public ShowInfo getShowInfo() {
+<span class="fc" id="L67">return showInfo;</span>
+}
+
+public void setShowInfo(ShowInfo showInfo) {
+<span class="fc" id="L71">this.showInfo = showInfo;</span>
+<span class="fc" id="L72">}</span>
+
+public String getSid() {
+<span class="fc" id="L75">return sid;</span>
+}
+
+public void setSid(String sid) {
+<span class="fc" id="L79">this.sid = sid;</span>
+<span class="fc" id="L80">}</span>
+
+public String getSectionName() {
+<span class="fc" id="L83">return sectionName;</span>
+}
+
+public void setSectionName(String sectionName) {
+<span class="fc" id="L87">this.sectionName = sectionName;</span>
+<span class="fc" id="L88">}</span>
+
+public Integer getPrice() {
+<span class="fc" id="L91">return price;</span>
+}
+
+public void setPrice(Integer price) {
+<span class="fc" id="L95">this.price = price;</span>
+<span class="fc" id="L96">}</span>
+
+public List&lt;Seating&gt; getSeating() {
+<span class="fc" id="L99">return seating;</span>
+}
+
+public void setSeating(List&lt;Seating&gt; seating) {
+<span class="fc" id="L103">this.seating = seating;</span>
+<span class="fc" id="L104">}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

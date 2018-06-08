@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SearchServices.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.ThaliaServices</a> &gt; <span class="el_source">SearchServices.java</span></div><h1>SearchServices.java</h1><pre class="source lang-java linenums">package org.projects.ThaliaServices;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.projects.Thalia.Order;
+import org.projects.Thalia.Orders;
+import org.projects.Thalia.OrdersSectionReceipt;
+import org.projects.Thalia.Shows;
+import org.projects.Thalia.ShowsList;
+import org.projects.ThaliaUtility.ExclusionStrategyForTickets;
+import org.projects.ThaliaUtility.UtilityDataStore;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+@Path(&quot;/search&quot;)
+<span class="fc" id="L26">public class SearchServices {</span>
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSearch(@QueryParam(&quot;topic&quot;) String topic, @QueryParam(&quot;key&quot;) String key) {
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">		if (topic.equalsIgnoreCase(&quot;order&quot;)) {</span>
+<span class="fc" id="L33">			return getSearchOrder(topic, key);</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">		} else if (topic.equalsIgnoreCase(&quot;shows&quot;)) {</span>
+<span class="fc" id="L35">			return getSearchShows(topic, key);</span>
+		} else {
+<span class="fc" id="L37">			return Response.status(Response.Status.OK).entity(&quot;NotFound&quot;).build();</span>
+		}
+	}
+
+	private Response getSearchShows(String topic, String key) {
+<span class="fc" id="L42">		List&lt;Shows&gt; showsList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L43">		Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L44">				.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getSearchShows&quot;)).setPrettyPrinting().create();</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">		for (Shows shows : UtilityDataStore.showsMap.values()) {</span>
+<span class="fc" id="L46">			Shows showSpecific = new Shows(shows);</span>
+<span class="pc bpc" id="L47" title="2 of 4 branches missed.">			if (showSpecific.getShowInfo().getName().contains(key) || showSpecific.getShowInfo().getWeb().contains(key)</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">					|| showSpecific.getWid().contains(key)) {</span>
+<span class="fc" id="L49">				showsList.add(showSpecific);</span>
+			}
+<span class="fc" id="L51">		} </span>
+<span class="fc" id="L52">		ShowsList showsListReport = new ShowsList();</span>
+<span class="fc" id="L53">		showsListReport.setShows(showsList);</span>
+<span class="fc" id="L54">		String s = gson.toJson(showsListReport);</span>
+<span class="fc" id="L55">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+
+	private Response getSearchOrder(String topic, String key) {
+<span class="fc" id="L59">		List&lt;OrdersSectionReceipt&gt; orderSectionList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L60">		Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L61">				.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getSearchOrder&quot;)).setPrettyPrinting().create();</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">		for (OrdersSectionReceipt orderSection : UtilityDataStore.ordersSectionReceiptMap.values()) {</span>
+<span class="pc bpc" id="L63" title="3 of 4 branches missed.">			if (orderSection.getOid().contains(key) || orderSection.getPatronInfo().getName().contains(key)</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">					|| orderSection.getPatronInfo().getEmail().contains(key)</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">					|| orderSection.getShowInfo().getName().contains(key)</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">					|| orderSection.getShowInfo().getWeb().contains(key)) {</span>
+<span class="fc" id="L67">				orderSectionList.add(orderSection);</span>
+			}
+<span class="fc" id="L69">		}</span>
+<span class="fc" id="L70">		Orders order = new Orders();</span>
+<span class="fc" id="L71">		order.setOrders(orderSectionList);</span>
+<span class="fc" id="L72">		String s = gson.toJson(order);</span>
+<span class="fc" id="L73">		return Response.status(Response.Status.OK).entity(s).build();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>

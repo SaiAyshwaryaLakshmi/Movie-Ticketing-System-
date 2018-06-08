@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ReportServices.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">thalia</a> &gt; <a href="index.source.html" class="el_package">org.projects.ThaliaServices</a> &gt; <span class="el_source">ReportServices.java</span></div><h1>ReportServices.java</h1><pre class="source lang-java linenums">package org.projects.ThaliaServices;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.projects.Thalia.Report;
+import org.projects.Thalia.Shows;
+import org.projects.ThaliaUtility.ExclusionStrategyForTickets;
+import org.projects.ThaliaUtility.UtilityDataStore;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+@Path(&quot;/reports&quot;)
+<span class="fc" id="L27">public class ReportServices {</span>
+ 
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getReports() {
+		
+<span class="fc" id="L33">			Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L34">					.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getReports&quot;)).setPrettyPrinting().create();</span>
+<span class="fc" id="L35">			String s = gson.toJson(new ArrayList(UtilityDataStore.reportsMap.values()));</span>
+<span class="fc" id="L36">			return Response.status(Response.Status.OK).entity(s).build();	</span>
+	}
+	@GET
+	@Path(&quot;{id}&quot;)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSpecificReports(@PathParam(&quot;id&quot;) String mrid,@QueryParam(&quot;show&quot;) String wid,@QueryParam(&quot;start_date&quot;) String startDate, @QueryParam(&quot;end_date&quot;) String endDate) {
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">		if(null!=wid&amp;&amp;!wid.equalsIgnoreCase(&quot;&quot;))</span>
+		{
+<span class="fc" id="L44">			return getReportForSpecificShow(mrid, wid);</span>
+		}
+		else
+<span class="nc bnc" id="L47" title="All 8 branches missed.">			if((null!=startDate&amp;&amp;!startDate.equalsIgnoreCase(&quot;&quot;))&amp;&amp;(null!=endDate&amp;&amp;!endDate.equalsIgnoreCase(&quot;&quot;)))</span>
+			{
+<span class="nc" id="L49">				return getReportForShowsInDateRange(mrid, startDate, endDate);</span>
+			}
+			else
+			{
+<span class="nc" id="L53">				return getReportForAllShows(mrid);</span>
+			}
+			
+	}
+	
+	public Response getReportForAllShows(String mrid)
+	{
+<span class="fc" id="L60">		Report reportBase =UtilityDataStore.reportsMap.get(mrid);</span>
+<span class="fc" id="L61">		Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L62">				.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getReportsForAllShows&quot;)).setPrettyPrinting().create();</span>
+<span class="fc" id="L63">		Report report = new Report();</span>
+<span class="fc" id="L64">		report.setMrid(reportBase.getMrid());</span>
+<span class="fc" id="L65">		report.setName(reportBase.getName());</span>
+<span class="fc" id="L66">		report.setStartDate(&quot;&quot;);</span>
+<span class="fc" id="L67">		report.setEndDate(&quot;&quot;);</span>
+<span class="fc" id="L68">		report.setTotalShows((long) UtilityDataStore.showsMap.values().size());</span>
+<span class="fc" id="L69">		List&lt;Shows&gt; showsList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">		for(Shows shows:UtilityDataStore.showsMap.values())</span>
+		{
+<span class="fc" id="L72">			Shows showSpecific = new Shows(shows); </span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">			report.setDonatedAndUsedTickets(report.getDonatedAndUsedTickets()!=null?report.getDonatedAndUsedTickets():0+shows.getDonatedAndUsedTickets());</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">			report.setDonatedAndUsedValue(report.getDonatedAndUsedValue()!=null?report.getDonatedAndUsedValue():0+shows.getDonatedAndUsedTickets());</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">			report.setDonatedTickets(report.getDonatedTickets()!=null?report.getDonatedTickets():0+shows.getDonatedTickets());</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">			report.setSoldSeats(report.getSoldSeats()!=null?report.getSoldSeats():0+shows.getSeatsSold());</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">			report.setTotalSeats(report.getTotalSeats()!=null?report.getTotalSeats():0+shows.getSeatsAvailable());</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">			report.setOverallRevenue(report.getOverallRevenue()!=null?report.getOverallRevenue():0+shows.getTotalAmount());</span>
+<span class="fc" id="L79">			showsList.add(showSpecific);</span>
+<span class="fc" id="L80">		}</span>
+<span class="fc" id="L81">		report.setOverallOccupancy(</span>
+<span class="pc bpc" id="L82" title="2 of 4 branches missed.">				new Float((float) ((report.getSoldSeats()!=null?report.getSoldSeats():0 * 100) / (report.getTotalSeats()!=null?report.getTotalSeats()</span>
+						:1)))
+<span class="fc" id="L84">				.toString() + &quot;%&quot;);</span>
+<span class="fc" id="L85">		report.setShows(showsList);</span>
+<span class="fc" id="L86">		String s = gson.toJson(report); </span>
+		
+<span class="fc" id="L88">	return Response.status(Response.Status.OK).entity(s).build();	</span>
+	}
+	public Response getReportForSpecificShow(String mrid,String wid)
+	{
+<span class="fc" id="L92">		Report reportBase =UtilityDataStore.reportsMap.get(mrid);</span>
+<span class="fc" id="L93">		Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L94">				.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getReportsForSpecificShow&quot;)).setPrettyPrinting().create();</span>
+<span class="fc" id="L95">		Report report = new Report();</span>
+<span class="fc" id="L96">		report.setMrid(reportBase.getMrid());</span>
+<span class="fc" id="L97">		report.setName(reportBase.getName());</span>
+<span class="fc" id="L98">		report.setStartDate(&quot;&quot;);</span>
+<span class="fc" id="L99">		report.setEndDate(&quot;&quot;);</span>
+<span class="fc" id="L100">		report.setTotalShows((long) UtilityDataStore.showsMap.values().size());</span>
+<span class="fc" id="L101">		report.setDonatedAndUsedTickets((long) (0));</span>
+<span class="fc" id="L102">		report.setDonatedAndUsedValue((long)0);</span>
+<span class="fc" id="L103">		report.setDonatedTickets((long)0);</span>
+<span class="fc" id="L104">		report.setSoldSeats((long)0);</span>
+<span class="fc" id="L105">		report.setTotalSeats((long)0);</span>
+<span class="fc" id="L106">		report.setOverallRevenue((long)0);</span>
+<span class="fc" id="L107">		List&lt;Shows&gt; showsList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L108">		Shows shows=UtilityDataStore.showsMap.get(wid);</span>
+		{
+<span class="fc" id="L110">			Shows showSpecific = new Shows(shows);</span>
+<span class="fc" id="L111">			report.setDonatedAndUsedTickets(report.getDonatedAndUsedTickets()+shows.getDonatedAndUsedTickets());</span>
+<span class="fc" id="L112">			report.setDonatedAndUsedValue(report.getDonatedAndUsedValue()+shows.getDonatedAndUsedValue());</span>
+<span class="fc" id="L113">			report.setDonatedTickets(report.getDonatedTickets()+shows.getDonatedTickets());</span>
+<span class="fc" id="L114">			report.setSoldSeats(report.getSoldSeats()+shows.getSeatsSold());</span>
+<span class="fc" id="L115">			report.setTotalSeats(report.getTotalSeats()+shows.getSeatsAvailable());</span>
+<span class="fc" id="L116">			report.setOverallRevenue(report.getOverallRevenue()+shows.getTotalAmount());</span>
+<span class="fc" id="L117">			showsList.add(showSpecific);</span>
+		}
+<span class="fc" id="L119">		report.setOverallOccupancy(</span>
+<span class="fc" id="L120">				new Float((float) ((report.getSoldSeats() * 100) / report.getTotalSeats()))</span>
+<span class="fc" id="L121">				.toString() + &quot;%&quot;);</span>
+<span class="fc" id="L122">		report.setShows(showsList);</span>
+<span class="fc" id="L123">		String s = gson.toJson(report);</span>
+<span class="fc" id="L124">		s=s.replaceAll(&quot;seating_info&quot;, &quot;sections&quot;);</span>
+<span class="fc" id="L125">		s=s.replaceAll(&quot;price&quot;, &quot;section_price&quot;);</span>
+<span class="fc" id="L126">		return Response.status(Response.Status.OK).entity(s).build();	</span>
+	}
+	public Response getReportForShowsInDateRange(String mrid,String startDate,String endDate)
+	{
+<span class="fc" id="L130">		Report reportBase =UtilityDataStore.reportsMap.get(mrid);</span>
+<span class="fc" id="L131">		Gson gson = new GsonBuilder().setPrettyPrinting()</span>
+<span class="fc" id="L132">				.setExclusionStrategies(new ExclusionStrategyForTickets(&quot;getReportsForDateRange&quot;)).setPrettyPrinting().create();</span>
+<span class="fc" id="L133">		Report report = new Report();</span>
+<span class="fc" id="L134">		report.setMrid(reportBase.getMrid());</span>
+<span class="fc" id="L135">		report.setName(reportBase.getName());</span>
+<span class="fc" id="L136">		report.setStartDate(&quot;&quot;);</span>
+<span class="fc" id="L137">		report.setEndDate(&quot;&quot;);</span>
+<span class="fc" id="L138">		report.setTotalShows((long) UtilityDataStore.showsMap.values().size());</span>
+<span class="fc" id="L139">		report.setDonatedAndUsedTickets((long) (0));</span>
+<span class="fc" id="L140">		report.setDonatedAndUsedValue((long)0);</span>
+<span class="fc" id="L141">		report.setDonatedTickets((long)0);</span>
+<span class="fc" id="L142">		report.setSoldSeats((long)0);</span>
+<span class="fc" id="L143">		report.setTotalSeats((long)0);</span>
+<span class="fc" id="L144">		report.setOverallRevenue((long)0);</span>
+<span class="fc" id="L145">		List&lt;Shows&gt; showsList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">		for(Shows shows:UtilityDataStore.showsMap.values())</span>
+		{
+			try {
+<span class="fc" id="L149">			SimpleDateFormat orderFormatter = new SimpleDateFormat(&quot;yyyy-mm-dd&quot;,Locale.ENGLISH);</span>
+<span class="fc" id="L150">			Date showDate = orderFormatter.parse(shows.getShowInfo().getDate());</span>
+<span class="fc" id="L151">			SimpleDateFormat filterDate = new SimpleDateFormat(&quot;yyyyMMdd&quot;);</span>
+<span class="fc" id="L152">			Date start = filterDate.parse(startDate);</span>
+<span class="fc" id="L153">			Date end = filterDate.parse(endDate);</span>
+<span class="pc bpc" id="L154" title="3 of 4 branches missed.">			if (showDate.compareTo(start) &gt;= 0 &amp;&amp; showDate.compareTo(end) &lt;= 0) {</span>
+				
+			
+<span class="nc" id="L157">			Shows showSpecific = new Shows(shows); </span>
+<span class="nc" id="L158">			report.setDonatedAndUsedTickets(report.getDonatedAndUsedTickets()+shows.getDonatedAndUsedTickets());</span>
+<span class="nc" id="L159">			report.setDonatedAndUsedValue(report.getDonatedAndUsedValue()+shows.getDonatedAndUsedTickets());</span>
+<span class="nc" id="L160">			report.setDonatedTickets(report.getDonatedTickets()+shows.getDonatedTickets());</span>
+<span class="nc" id="L161">			report.setSoldSeats(report.getSoldSeats()+shows.getSeatsSold());</span>
+<span class="nc" id="L162">			report.setTotalSeats(report.getTotalSeats()+shows.getSeatsAvailable());</span>
+<span class="nc" id="L163">			report.setOverallRevenue(report.getOverallRevenue()+shows.getTotalAmount());</span>
+<span class="nc" id="L164">			showsList.add(showSpecific);</span>
+			}
+			}
+<span class="nc" id="L167">			catch(Exception ex)</span>
+			{
+<span class="nc" id="L169">				ex.printStackTrace();</span>
+<span class="fc" id="L170">			}</span>
+<span class="fc" id="L171">		}</span>
+<span class="fc" id="L172">		report.setOverallOccupancy(</span>
+<span class="pc bpc" id="L173" title="3 of 6 branches missed.">				new Float((float) ((report.getSoldSeats()!=null?report.getSoldSeats():0 * 100) / (report.getTotalSeats()!=null&amp;&amp;report.getTotalSeats()!=0?report.getTotalSeats()</span>
+						:1)))
+<span class="fc" id="L175">				.toString() + &quot;%&quot;);</span>
+<span class="fc" id="L176">		report.setShows(showsList);</span>
+<span class="fc" id="L177">		String s = gson.toJson(report);</span>
+<span class="fc" id="L178">		return Response.status(Response.Status.OK).entity(s).build();	</span>
+	}
+	@PostConstruct
+	public void postConstruct() {
+<span class="nc" id="L182">		UtilityDataStore.initializeReportsMap();</span>
+<span class="nc" id="L183">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.4.201502262128</span></div></body></html>
